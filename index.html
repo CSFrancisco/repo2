@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Etiquetas y QR</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Generador de Etiquetas y Códigos QR desde Excel</h1>
+
+    <!-- Sección de Carga de Archivo -->
+    <div class="upload-section">
+        <label for="excelFile">Selecciona un archivo Excel:</label>
+        <input type="file" id="excelFile" accept=".xls, .xlsx">
+    </div>
+
+    <!-- Sección de Diseño de Formato de Etiqueta -->
+    <div id="format-design" class="hidden">
+        <h2>Diseña el Formato de tu Etiqueta</h2>
+        <div class="design-options">
+            <div class="option-group">
+                <label for="labelWidthCm">Ancho (cm):</label>
+                <input type="number" id="labelWidthCm" value="5" min="1" step="0.1">
+            </div>
+            <div class="option-group">
+                <label for="labelHeightCm">Alto (cm):</label>
+                <input type="number" id="labelHeightCm" value="3" min="1" step="0.1">
+            </div>
+            <div class="option-group">
+                <label for="includeQR">Incluir Código QR:</label>
+                <input type="checkbox" id="includeQR" checked>
+            </div>
+            <div class="option-group">
+                <label for="qrPosition">Posición del QR:</label>
+                <select id="qrPosition">
+                    <option value="top-left">Arriba Izquierda</option>
+                    <option value="top-center">Arriba Central</option>
+                    <option value="top-right">Arriba Derecha</option>
+                    <option value="bottom-left">Abajo Izquierda</option>
+                    <option value="bottom-center">Abajo Central</option>
+                    <option value="bottom-right">Abajo Derecha</option>
+                    <option value="center">Centro</option>
+                </select>
+            </div>
+            <div class="option-group">
+                <label for="qrSizeCm">Tamaño del QR (cm):</label>
+                <input type="number" id="qrSizeCm" value="2" min="0.5" step="0.1">
+            </div>
+             <div class="option-group">
+                <label for="qrColor">Color del QR:</label>
+                <input type="color" id="qrColor" value="#000000">
+            </div>
+             <div class="option-group">
+                <label for="qrBackgroundColor">Fondo QR:</label>
+                <input type="color" id="qrBackgroundColor" value="#ffffff">
+            </div>
+            <div class="option-group">
+                <label for="showColumnHeaders">Mostrar Títulos de Columna:</label>
+                <input type="checkbox" id="showColumnHeaders">
+            </div>
+            <div class="option-group">
+                <label for="textAlign">Alineación del Texto:</label>
+                <select id="textAlign">
+                    <option value="center" selected>Centro</option>
+                    <option value="left">Izquierda</option>
+                    <option value="right">Derecha</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="title-section">
+            <h3>Título de la Etiqueta (Opcional)</h3>
+            <div class="title-options">
+                <div class="option-group">
+                    <label for="includeTitle">Incluir título:</label>
+                    <input type="checkbox" id="includeTitle">
+                </div>
+            </div>
+            <div id="titleOptions" class="title-options hidden">
+                <div class="option-group">
+                    <label for="titleType">Tipo de título:</label>
+                    <select id="titleType">
+                        <option value="text">Texto</option>
+                        <option value="logo">Logo / Imagen</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label for="titleAlign">Alineación del título:</label>
+                    <select id="titleAlign">
+                        <option value="center" selected>Centro</option>
+                        <option value="left">Izquierda</option>
+                        <option value="right">Derecha</option>
+                    </select>
+                </div>
+                <div id="titleTextOptions" class="title-type-options">
+                    <div class="option-group">
+                        <label for="titleText">Texto del título:</label>
+                        <input type="text" id="titleText" placeholder="Escribe el título...">
+                    </div>
+                    <div class="option-group">
+                        <label for="titleFontSize">Tamaño del texto (px):</label>
+                        <input type="number" id="titleFontSize" value="14" min="8" max="72" step="1">
+                    </div>
+                </div>
+                <div id="titleLogoOptions" class="title-type-options hidden">
+                    <div class="option-group">
+                        <label for="headerImageFile">Selecciona una imagen:</label>
+                        <input type="file" id="headerImageFile" accept="image/*">
+                    </div>
+                    <div class="option-group">
+                        <label for="headerImageHeight">Alto de la imagen (cm):</label>
+                        <input type="number" id="headerImageHeight" value="1" min="0.3" step="0.1">
+                    </div>
+                    <div id="imagePreview" class="image-preview hidden">
+                        <p>Previsualización:</p>
+                        <img id="previewImg" src="" alt="Previsualización">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button id="applyFormatBtn">Aplicar Formato y Generar Etiquetas</button>
+    </div>
+
+    <!-- Sección de Selección de Datos (para columnas de Excel) -->
+    <div id="data-selection" class="hidden">
+        <h2>Selecciona los datos de tu Excel</h2>
+        <div id="column-selectors">
+            <!-- Selectores para QR y texto de etiqueta se generarán aquí -->
+        </div>
+    </div>
+
+    <!-- Sección de Vista Previa y Descarga -->
+    <div id="label-preview" class="hidden">
+        <h2>Vista Previa de Etiquetas</h2>
+        <div id="labels-container">
+            <!-- Aquí se mostrarán las etiquetas generadas -->
+        </div>
+        <div class="download-options">
+            <h3>Descargar:</h3>
+            <div class="download-settings">
+                <label for="fileNameColumn">Usar como nombre de archivo:</label>
+                <select id="fileNameColumn">
+                    <option value="">-- Selecciona una columna --</option>
+                </select>
+            </div>
+            <button id="downloadAllJpgZipBtn">Descargar Todas como ZIP (JPG)</button>
+            <button id="downloadAllPdfBtn">Descargar Todas (PDF)</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Librería QR cargada localmente -->
+    <script src="js/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Librería JSZip para crear archivos ZIP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
