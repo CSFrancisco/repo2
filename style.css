@@ -61,14 +61,14 @@ button:hover {
     align-items: center;
     justify-content: center;
     text-align: center;
-    border: 1px solid #ddd;
+    border: none;
     border-radius: 5px;
     overflow: hidden;
     position: relative;
 }
 
 .label canvas {
-    border: 1px solid #eee;
+    border: none;
     border-radius: 3px;
 }
 
@@ -415,7 +415,7 @@ button:hover {
     display: flex;
     flex-direction: column;
     position: relative;
-    border: 1px solid #ddd;
+    border: none;
 }
 
 .label-header-image {
