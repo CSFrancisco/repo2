@@ -153,13 +153,100 @@ button:hover {
     overflow: hidden;
 }
 
+.label-field {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
 .label-field label {
     font-weight: normal;
+    display: inline;
+    margin-right: 15px;
+    margin-bottom: 0;
+}
+
+.label-field select {
+    display: block;
+    margin: 10px 0 10px 0;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Opciones por campo */
+.field-options {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.field-options label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 0;
+    font-weight: normal;
+}
+
+.field-options input[type="checkbox"] {
+    margin: 0;
+}
+
+.field-options select {
+    display: inline-block;
+    width: auto;
+    margin: 0;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: auto;
+}
+
+.label-field button {
+    cursor: pointer;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    margin-top: 10px;
+}
+
+.label-field button:hover {
+    background-color: #c82333;
 }
 
 /* --- Estilos para los campos de selección de columnas --- */
 #column-selectors label {
     font-weight: bold;
+}
+
+#column-selectors h4 {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+#column-selectors > div > button {
+    display: block;
+    width: auto;
+    padding: 10px 15px;
+    background-color: #007bff;
+    margin-top: 10px;
+}
+
+#column-selectors > div > button:hover {
+    background-color: #0056b3;
 }
 
 /* --- Estilos para la sección de Diseño de Formato --- */
@@ -365,34 +452,6 @@ button:hover {
     flex-grow: 1;
 }
 
-/* Estilos para los campos de selección de columnas */
-#column-selectors label {
-    font-weight: bold;
-    color: #333;
-}
-
-.label-field select {
-    margin-left: 5px;
-    margin-right: 10px;
-    border: 1px solid #ddd;
-    padding: 5px;
-    border-radius: 4px;
-}
-
-.label-field button {
-    cursor: pointer;
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 0.8em;
-}
-
-.label-field button:hover {
-    background-color: #c82333;
-}
-
 /* Responsive: si la pantalla es pequeña, que las opciones de diseño se apilen */
 @media (max-width: 768px) {
     .design-options {
@@ -423,5 +482,23 @@ button:hover {
     .title-type-options .option-group {
         flex-direction: row;
         justify-content: space-between;
+    }
+
+    .field-options {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .field-options label {
+        display: flex;
+        align-items: center;
+    }
+
+    .field-options select {
+        width: 100%;
+    }
+
+    .label-field {
+        width: 100%;
     }
 }
