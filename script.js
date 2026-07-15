@@ -10,7 +10,7 @@ let selectedColumns = {};
 let generatedLabels = [];
 let currentLabelFormat = {}; // Objeto para almacenar las configuraciones de formato aplicadas
 let headerImageDataUrl = null;
-let labelFieldsConfig = {}; // Configuración por campo (alineación, negritas, mostrar título)
+let labelFieldsConfig = {}; // Configuración por campo (alineación, negritas, mostrar título, fuente, tamaño)
 
 // --- Elementos del DOM ---
 const fileInput = document.getElementById('excelFile');
@@ -212,6 +212,17 @@ function displayColumnSelectors() {
                         <option value="center" selected>Centro</option>
                         <option value="right">Derecha</option>
                     </select>
+                    <label>Fuente:</label>
+                    <select class="fieldFont">
+                        <option value="Arial" selected>Arial</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                    </select>
+                    <label>Tamaño (px):</label>
+                    <input type="number" class="fieldFontSize" value="10" min="6" max="36" step="1">
                 </div>
             </div>
         </div>
@@ -254,6 +265,17 @@ function addLabelField() {
                 <option value="center" selected>Centro</option>
                 <option value="right">Derecha</option>
             </select>
+            <label>Fuente:</label>
+            <select class="fieldFont">
+                <option value="Arial" selected>Arial</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Trebuchet MS">Trebuchet MS</option>
+            </select>
+            <label>Tamaño (px):</label>
+            <input type="number" class="fieldFontSize" value="10" min="6" max="36" step="1">
         </div>
         <button type="button" onclick="this.parentNode.remove()">Eliminar</button>
     `;
@@ -281,11 +303,15 @@ function applyAndGenerateLabels() {
             const showHeader = fieldEl.querySelector('.showColumnHeader').checked;
             const isBold = fieldEl.querySelector('.fieldBold').checked;
             const align = fieldEl.querySelector('.fieldAlign').value;
+            const fontFamily = fieldEl.querySelector('.fieldFont').value;
+            const fontSize = fieldEl.querySelector('.fieldFontSize').value;
             
             labelFieldsConfig[columnName] = {
                 showHeader: showHeader,
                 bold: isBold,
-                align: align
+                align: align,
+                fontFamily: fontFamily,
+                fontSize: fontSize
             };
         }
     });
@@ -373,7 +399,13 @@ function generateLabels(format) {
         // Construir contenido con configuración por campo
         let labelContentParts = [];
         selectedColumns.labelDataColumns.forEach(col => {
-            const config = labelFieldsConfig[col] || { showHeader: true, bold: false, align: 'center' };
+            const config = labelFieldsConfig[col] || { 
+                showHeader: true, 
+                bold: false, 
+                align: 'center',
+                fontFamily: 'Arial',
+                fontSize: '10'
+            };
             let text = '';
             
             if (config.showHeader) {
@@ -385,7 +417,9 @@ function generateLabels(format) {
             labelContentParts.push({
                 text: text,
                 bold: config.bold,
-                align: config.align
+                align: config.align,
+                fontFamily: config.fontFamily,
+                fontSize: config.fontSize
             });
         });
 
@@ -525,7 +559,6 @@ function generateLabels(format) {
             textDiv.style.justifyContent = 'center';
             textDiv.style.padding = '5px';
             textDiv.style.overflowY = 'auto';
-            textDiv.style.fontSize = '0.85em';
 
             // Crear párrafos individuales para cada campo
             labelContentParts.forEach(part => {
@@ -534,6 +567,8 @@ function generateLabels(format) {
                 paragraph.style.whiteSpace = 'pre-wrap';
                 paragraph.style.wordWrap = 'break-word';
                 paragraph.style.margin = '2px 0';
+                paragraph.style.fontFamily = part.fontFamily;
+                paragraph.style.fontSize = `${part.fontSize}px`;
                 
                 if (part.bold) {
                     paragraph.style.fontWeight = 'bold';
