@@ -10,6 +10,7 @@ let selectedColumns = {};
 let generatedLabels = [];
 let currentLabelFormat = {}; // Objeto para almacenar las configuraciones de formato aplicadas
 let headerImageDataUrl = null;
+let labelFieldsConfig = {}; // Configuración por campo (alineación, negritas, mostrar título)
 
 // --- Elementos del DOM ---
 const fileInput = document.getElementById('excelFile');
@@ -31,8 +32,8 @@ const qrPositionSelect = document.getElementById('qrPosition');
 const qrSizeCmInput = document.getElementById('qrSizeCm');
 const qrColorInput = document.getElementById('qrColor');
 const qrBackgroundColorInput = document.getElementById('qrBackgroundColor');
-const showColumnHeadersCheckbox = document.getElementById('showColumnHeaders');
 const textAlignSelect = document.getElementById('textAlign');
+const textBoldCheckbox = document.getElementById('textBold');
 const includeTitleCheckbox = document.getElementById('includeTitle');
 const titleOptionsDiv = document.getElementById('titleOptions');
 const titleTypeSelect = document.getElementById('titleType');
@@ -202,6 +203,15 @@ function displayColumnSelectors() {
                     <option value="">-- Selecciona una columna --</option>
                     ${headers.map(header => `<option value="${header}">${header}</option>`).join('')}
                 </select>
+                <div class="field-options">
+                    <label><input type="checkbox" class="showColumnHeader" checked> Mostrar título de columna</label>
+                    <label><input type="checkbox" class="fieldBold"> Negritas</label>
+                    <select class="fieldAlign">
+                        <option value="center" selected>Centro</option>
+                        <option value="left">Izquierda</option>
+                        <option value="right">Derecha</option>
+                    </select>
+                </div>
             </div>
         </div>
         <button type="button" onclick="addLabelField()">Añadir otro campo a la etiqueta</button>
@@ -234,6 +244,15 @@ function addLabelField() {
             <option value="">-- Selecciona una columna --</option>
             ${headers.map(header => `<option value="${header}">${header}</option>`).join('')}
         </select>
+        <div class="field-options">
+            <label><input type="checkbox" class="showColumnHeader" checked> Mostrar título de columna</label>
+            <label><input type="checkbox" class="fieldBold"> Negritas</label>
+            <select class="fieldAlign">
+                <option value="center" selected>Centro</option>
+                <option value="left">Izquierda</option>
+                <option value="right">Derecha</option>
+            </select>
+        </div>
         <button type="button" onclick="this.parentNode.remove()">Eliminar</button>
     `;
     labelFieldsDiv.appendChild(newFieldDiv);
@@ -243,13 +262,34 @@ function applyAndGenerateLabels() {
     // 1. Capturar selecciones de columnas
     const qrDataColumnSelect = document.getElementById('qrDataColumn');
     const labelColumnInputs = document.querySelectorAll('.labelColumn');
+    const labelFieldElements = document.querySelectorAll('.label-field');
 
     selectedColumns = {
         qrDataColumn: qrDataColumnSelect ? qrDataColumnSelect.value : null,
         labelDataColumns: Array.from(labelColumnInputs).map(input => input.value).filter(col => col !== '')
     };
 
+    // 2. Capturar configuración por campo
+    labelFieldsConfig = {};
+    labelFieldElements.forEach((fieldEl, index) => {
+        const columnSelect = fieldEl.querySelector('.labelColumn');
+        const columnName = columnSelect.value;
+        
+        if (columnName) {
+            const showHeader = fieldEl.querySelector('.showColumnHeader').checked;
+            const isBold = fieldEl.querySelector('.fieldBold').checked;
+            const align = fieldEl.querySelector('.fieldAlign').value;
+            
+            labelFieldsConfig[columnName] = {
+                showHeader: showHeader,
+                bold: isBold,
+                align: align
+            };
+        }
+    });
+
     console.log("Columnas seleccionadas:", selectedColumns);
+    console.log("Configuración por campo:", labelFieldsConfig);
 
     if (!selectedColumns.qrDataColumn || selectedColumns.labelDataColumns.length === 0) {
         alert("Por favor, selecciona al menos una columna para el dato del código QR y una para el texto de la etiqueta.");
@@ -280,8 +320,8 @@ function applyAndGenerateLabels() {
         qrSizePx: cmToPx(parseFloat(qrSizeCmInput.value) || 2),
         qrColor: qrColorInput.value,
         qrBackgroundColor: qrBackgroundColorInput.value,
-        showColumnHeaders: showColumnHeadersCheckbox.checked,
         textAlign: textAlignSelect.value,
+        textBold: textBoldCheckbox.checked,
         includeTitle,
         titleType: includeTitle ? titleType : 'none',
         titleText,
@@ -295,18 +335,18 @@ function applyAndGenerateLabels() {
         width: currentLabelFormat.widthPx,
         height: currentLabelFormat.heightPx,
         qrSize: currentLabelFormat.qrSizePx,
-        showHeaders: currentLabelFormat.showColumnHeaders
+        textBold: currentLabelFormat.textBold
     });
 
     // 3. Validaciones: Asegurar que el QR no se solape
     const qrPadding = 5;
     if (currentLabelFormat.includeQR) {
         if (currentLabelFormat.qrSizePx > currentLabelFormat.widthPx - (2 * qrPadding)) {
-            alert(`El tamaño del código QR (${pxToCm(currentLabelFormat.qrSizePx).toFixed(1)} cm) es demasiado grande para el ancho de la etiqueta (${pxToCm(currentLabelFormat.widthPx).toFixed(1)} cm).`);
+            alert(`El tamaño del código QR (${pxToCm(currentLabelFormat.qrSizePx).toFixed(1)} cm) es demasiado grande para el ancho de la etiqueta (${pxToCm(currentLabelFormat.widthPx).toFixed([...]
             return;
         }
         if (currentLabelFormat.qrSizePx > currentLabelFormat.heightPx - (2 * qrPadding)) {
-            alert(`El tamaño del código QR (${pxToCm(currentLabelFormat.qrSizePx).toFixed(1)} cm) es demasiado grande para el alto de la etiqueta (${pxToCm(currentLabelFormat.heightPx).toFixed(1)} cm).`);
+            alert(`El tamaño del código QR (${pxToCm(currentLabelFormat.qrSizePx).toFixed(1)} cm) es demasiado grande para el alto de la etiqueta (${pxToCm(currentLabelFormat.heightPx).toFixed([...]
             return;
         }
     }
@@ -328,14 +368,24 @@ function generateLabels(format) {
     excelData.forEach((row, index) => {
         const qrData = row[selectedColumns.qrDataColumn] || '';
         
-        // Construir contenido con o sin títulos de columna
+        // Construir contenido con configuración por campo
         let labelContentParts = [];
-        if (format.showColumnHeaders) {
-            labelContentParts = selectedColumns.labelDataColumns.map(col => `${col}: ${row[col] || ''}`);
-        } else {
-            labelContentParts = selectedColumns.labelDataColumns.map(col => row[col] || '');
-        }
-        const fullLabelContent = labelContentParts.join('\n');
+        selectedColumns.labelDataColumns.forEach(col => {
+            const config = labelFieldsConfig[col] || { showHeader: true, bold: false, align: 'center' };
+            let text = '';
+            
+            if (config.showHeader) {
+                text = `${col}: ${row[col] || ''}`;
+            } else {
+                text = row[col] || '';
+            }
+            
+            labelContentParts.push({
+                text: text,
+                bold: config.bold,
+                align: config.align
+            });
+        });
 
         // --- Crear elemento canvas para QR (si se incluye) ---
         let qrCanvas = null;
@@ -394,19 +444,6 @@ function generateLabels(format) {
             labelElement.style.boxSizing = 'border-box';
             labelElement.style.overflow = 'hidden';
             labelElement.style.alignItems = 'stretch';
-
-            const textAlign = format.textAlign || 'center';
-
-            // Estilos de texto base
-            const textElementStyles = {
-                textAlign: textAlign,
-                width: '100%',
-                whiteSpace: 'pre-wrap',
-                flexGrow: '1',
-                padding: '5px',
-                overflowY: 'auto',
-                fontSize: '0.85em'
-            };
 
             // Posicionamiento del QR (vertical)
             let textFlexDirection = 'column';
@@ -476,10 +513,32 @@ function generateLabels(format) {
                 labelElement.appendChild(titleElement);
             }
 
-            // Crear y configurar el div del texto
+            // Crear y configurar el div del texto con múltiples párrafos
             const textDiv = document.createElement('div');
-            Object.assign(textDiv.style, textElementStyles);
-            textDiv.innerText = fullLabelContent;
+            textDiv.style.display = 'flex';
+            textDiv.style.flexDirection = 'column';
+            textDiv.style.width = '100%';
+            textDiv.style.justifyContent = 'center';
+            textDiv.style.padding = '5px';
+            textDiv.style.overflowY = 'auto';
+            textDiv.style.fontSize = '0.85em';
+
+            // Crear párrafos individuales para cada campo
+            labelContentParts.forEach(part => {
+                const paragraph = document.createElement('div');
+                paragraph.style.textAlign = part.align;
+                paragraph.style.whiteSpace = 'pre-wrap';
+                paragraph.style.wordWrap = 'break-word';
+                paragraph.style.margin = '2px 0';
+                
+                if (part.bold) {
+                    paragraph.style.fontWeight = 'bold';
+                }
+                
+                paragraph.innerText = part.text;
+                textDiv.appendChild(paragraph);
+            });
+
             labelElement.appendChild(textDiv);
 
             labelsContainer.appendChild(labelElement);
