@@ -33,7 +33,6 @@ const qrSizeCmInput = document.getElementById('qrSizeCm');
 const qrColorInput = document.getElementById('qrColor');
 const qrBackgroundColorInput = document.getElementById('qrBackgroundColor');
 const textAlignSelect = document.getElementById('textAlign');
-const textBoldCheckbox = document.getElementById('textBold');
 const includeTitleCheckbox = document.getElementById('includeTitle');
 const titleOptionsDiv = document.getElementById('titleOptions');
 const titleTypeSelect = document.getElementById('titleType');
@@ -349,7 +348,6 @@ function applyAndGenerateLabels() {
         qrColor: qrColorInput.value,
         qrBackgroundColor: qrBackgroundColorInput.value,
         textAlign: textAlignSelect.value,
-        textBold: textBoldCheckbox.checked,
         includeTitle,
         titleType: includeTitle ? titleType : 'none',
         titleText,
@@ -362,19 +360,18 @@ function applyAndGenerateLabels() {
     console.log("Formato de etiqueta seleccionado (en PX):", {
         width: currentLabelFormat.widthPx,
         height: currentLabelFormat.heightPx,
-        qrSize: currentLabelFormat.qrSizePx,
-        textBold: currentLabelFormat.textBold
+        qrSize: currentLabelFormat.qrSizePx
     });
 
     // 3. Validaciones: Asegurar que el QR no se solape
     const qrPadding = 5;
     if (currentLabelFormat.includeQR) {
         if (currentLabelFormat.qrSizePx > currentLabelFormat.widthPx - (2 * qrPadding)) {
-            alert(`El tamaño del código QR (${pxToCm(currentLabelFormat.qrSizePx).toFixed(1)} cm) es demasiado grande para el ancho de la etiqueta (${pxToCm(currentLabelFormat.widthPx).toFixed([...]
+            alert(`El tamaño del código QR (${pxToCm(currentLabelFormat.qrSizePx).toFixed(1)} cm) es demasiado grande para el ancho de la etiqueta (${pxToCm(currentLabelFormat.widthPx).toFixed(1)} cm).`);
             return;
         }
         if (currentLabelFormat.qrSizePx > currentLabelFormat.heightPx - (2 * qrPadding)) {
-            alert(`El tamaño del código QR (${pxToCm(currentLabelFormat.qrSizePx).toFixed(1)} cm) es demasiado grande para el alto de la etiqueta (${pxToCm(currentLabelFormat.heightPx).toFixed([...]
+            alert(`El tamaño del código QR (${pxToCm(currentLabelFormat.qrSizePx).toFixed(1)} cm) es demasiado grande para el alto de la etiqueta (${pxToCm(currentLabelFormat.heightPx).toFixed(1)} cm).`);
             return;
         }
     }
