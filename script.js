@@ -204,11 +204,12 @@ function displayColumnSelectors() {
                     ${headers.map(header => `<option value="${header}">${header}</option>`).join('')}
                 </select>
                 <div class="field-options">
-                    <label><input type="checkbox" class="showColumnHeader" checked> Mostrar título de columna</label>
+                    <label><input type="checkbox" class="showColumnHeader" checked> Mostrar título</label>
                     <label><input type="checkbox" class="fieldBold"> Negritas</label>
+                    <label>Posición:</label>
                     <select class="fieldAlign">
-                        <option value="center" selected>Centro</option>
                         <option value="left">Izquierda</option>
+                        <option value="center" selected>Centro</option>
                         <option value="right">Derecha</option>
                     </select>
                 </div>
@@ -245,11 +246,12 @@ function addLabelField() {
             ${headers.map(header => `<option value="${header}">${header}</option>`).join('')}
         </select>
         <div class="field-options">
-            <label><input type="checkbox" class="showColumnHeader" checked> Mostrar título de columna</label>
+            <label><input type="checkbox" class="showColumnHeader" checked> Mostrar título</label>
             <label><input type="checkbox" class="fieldBold"> Negritas</label>
+            <label>Posición:</label>
             <select class="fieldAlign">
-                <option value="center" selected>Centro</option>
                 <option value="left">Izquierda</option>
+                <option value="center" selected>Centro</option>
                 <option value="right">Derecha</option>
             </select>
         </div>
@@ -436,7 +438,7 @@ function generateLabels(format) {
             labelElement.id = `label-${index}`;
             labelElement.style.width = `${format.widthPx}px`;
             labelElement.style.height = `${format.heightPx}px`;
-            labelElement.style.border = '1px solid #ccc';
+            labelElement.style.border = 'none';
             labelElement.style.padding = '10px';
             labelElement.style.margin = '10px';
             labelElement.style.display = 'flex';
@@ -444,6 +446,8 @@ function generateLabels(format) {
             labelElement.style.boxSizing = 'border-box';
             labelElement.style.overflow = 'hidden';
             labelElement.style.alignItems = 'stretch';
+            labelElement.style.backgroundColor = '#fff';
+            labelElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
 
             // Posicionamiento del QR (vertical)
             let textFlexDirection = 'column';
